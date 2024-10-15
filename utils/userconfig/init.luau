@@ -1,49 +1,43 @@
---$kit
-local Strict = require(script.Parent.strict)
-
-type ConfigImpl<T={[string]:any}> = {
-	__index:ConfigImpl<T>;
-	SaveChanges:(self:ConfigImpl<T>)->();
-	GetChanges:(self:ConfigImpl<T>)->();
-	DiscardChanges:(self:ConfigImpl<T>)->();
-	Reset:(self:ConfigImpl<T>)->();
-	RawSet:(self:ConfigImpl<T>)->();
-	RawGet:(self:ConfigImpl<T>)->();
+--!strict
+type UserConfigImpl = {
+    __index: UserConfigImpl,
+    __call: (self: UserConfig) -> ({ [string]: any }),
+    new: (settings: { [string]: any }) -> (UserConfig),
+    saveChangesToServer: (self: UserConfig) -> (),
+    onChanged: (self: UserConfig, fn: <T>(...T) -> ()) -> (),
 }
-type Config<T> = typeof(setmetatable({}::{},{}::ConfigImpl<T>))
 
-local Config = {}::ConfigImpl
+export type UserConfig = typeof(setmetatable({} :: {
+    _config: { [string]: any },
+    packet: any --// net.packet
+}, {} :: UserConfigImpl))
 
-function Config:SaveChanges()
+local namespace = Net.defineNamespace "userConfigNetworking"
+local userconfig = {} :: UserConfigImpl
+userconfig.__index = userconfig
 
+function userconfig.__call(self)
+    return self._config
+end 
+
+function userconfig.new(settings)
+    return setmetatable({
+        _config=settings,
+        packet = namespace:createPacket(
+            "client",
+            Net.table(),
+        )
+    }, userconfig) 
 end
 
-function Config:GetChanges()
-
+function userconfig.saveChangesToServer(self)
+    self.packet:sendToServer(self._config)
 end
 
-function Config:DiscardChanges()
+function userconfig.onChanged(self, fn)
+    self.packet:onReceived:Connect(function(config)
+        fn(config)
+    end)
+end 
 
-end
-
-function Config:Reset()
-
-end
-
-function Config:RawSet()
-
-end
-
-function Config:RawGet()
-
-end
-
-function Config:__index(k)
-
-end
-
-function Config:__newindex(k,v)
-
-end
-
-return setmetatable({},Config)::Config<typeof(require(script.Parent))>
+return userconfig
