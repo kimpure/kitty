@@ -1,49 +1,61 @@
+--!strict
 --$kit
-local Strict = require(script.Parent.strict)
+local RunService = game:GetService('RunService')
+
+-- local HandyNet = require(script.Parent:WaitForChild('pesdePackages'):WaitForChild('handynet'))
+-- local DataStoreLight = require(script.Parent:WaitForChild('datastore-light'))
+
+type UserConfigImpl<T={[string]: any}> = {
+    __index: UserConfigImpl<T>,
+	new: <T>(T & { [string]: any }) -> ConfigImpl<T>,
+}
 
 type ConfigImpl<T={[string]:any}> = {
 	__index:ConfigImpl<T>;
 	SaveChanges:(self:ConfigImpl<T>)->();
-	GetChanges:(self:ConfigImpl<T>)->();
+	GetChanges:(self:ConfigImpl<T>, call: (self:T)->())->();
 	DiscardChanges:(self:ConfigImpl<T>)->();
 	Reset:(self:ConfigImpl<T>)->();
-	RawSet:(self:ConfigImpl<T>)->();
-	RawGet:(self:ConfigImpl<T>)->();
+	RawSet:(self:ConfigImpl<T>, value:{[string]:any})->();
+	RawGet:(self:ConfigImpl<T>)->(T);
+    saveChangesToServer:(self:ConfigImpl<T>)->();
+	values: T;
+	rawValues: T;
 }
-type Config<T> = typeof(setmetatable({}::{},{}::ConfigImpl<T>))
+local config = {} :: ConfigImpl
+config.__index = config
 
-local Config = {}::ConfigImpl
+function config.SaveChanges(self)
+	
+end
 
-function Config:SaveChanges()
+function config.GetChanges(self)
+	
+end
+
+function config.DiscardChanges(self)
 
 end
 
-function Config:GetChanges()
+function config.Reset(self)
 
 end
 
-function Config:DiscardChanges()
+function config.RawSet(self)
 
 end
 
-function Config:Reset()
+function config.RawGet(self)
 
 end
 
-function Config:RawSet()
+function config.saveChangesToServer(self)
 
 end
 
-function Config:RawGet()
+local userConfig = {} :: UserConfigImpl
+userConfig.__index = userConfig
 
+function userConfig.new(configs)
+	return config :: ConfigImpl<typeof(configs)>
 end
-
-function Config:__index(k)
-
-end
-
-function Config:__newindex(k,v)
-
-end
-
-return setmetatable({},Config)::Config<typeof(require(script.Parent))>

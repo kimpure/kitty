@@ -7,6 +7,10 @@
 			"packages": {
 				"$path": "Packages",
 
+				"pesdePackages": {
+					"$path": "roblox_packages"
+				},
+
 				"debugger": {
 					"$path": "utils/debugger"
 				},
