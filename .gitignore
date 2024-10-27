@@ -3,3 +3,4 @@ playground
 sourcemap.json
 **/*.lock
 launcher/target
+roblox_packages

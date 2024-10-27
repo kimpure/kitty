@@ -13,4 +13,4 @@ sourcemap_generator = ".pesde/sourcemap_generator.luau"
 default = "https://github.com/daimond113/pesde-index"
 
 [dependencies]
-handynet = { name = "caveful_games/handynet", version = "^0.2.2" }
+handynet = { name = "caveful_games/handynet", version = "^0.2.3" }
