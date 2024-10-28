@@ -109,7 +109,6 @@ userConfig.__index = userConfig
 function userConfig.new(configs)
 	local cloenConfig = setmetatable({} :: any, config)
 	
-	print(getPacketTable(configs))
 	cloenConfig.values = configs
 	cloenConfig.rawValues = configs
 	cloenConfig.discardValues = configs
