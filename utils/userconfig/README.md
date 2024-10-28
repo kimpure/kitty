@@ -9,19 +9,25 @@
 - 타입 체크, 자동완성을 지원함
 
 ## 사용 예시
-```lua
--- userconfig.luau
-local UserConfig = require(script.Parent.packages.userconfig)
-return UserConfig.new({
-	mySetting = "";
-	mySetting1 = 123;
-})
+configs.luau
+```luau
+local userconfig = require 'path to'
+return userconfig.new({ apple='사과', banana='바나나' }, '과일이름')
+```
 
--- client.luau
-local config = require(script.Parent.userconfig)
+client.luau
+```luau
+configs.values.apple = '바나나'
+configs.values.banana = '오렌지'
+configs:saveChangesToServer()
+```
 
-config().mySetting = "aaaa"
-config:saveChangesToServer()
+server.luau
+```luau
+configs:getChanges(function(data, player)
+	print(`apple: {data.apple}, banana: {data.banana}`)
+	userconfig:saveChanges(player)
+end)
 ```
 
 ## TODO
