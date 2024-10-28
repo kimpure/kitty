@@ -32,3 +32,4 @@ end)
 
 ## TODO
 - 기초 구현
+- pesde 로 wally package 들 불러오기
