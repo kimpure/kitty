@@ -6,10 +6,7 @@ local Players = game:GetService('Players')
 local HandyNet = require(script.Parent.pesdePackages.handynet)
 local DataStoreLight = require(script.Parent:WaitForChild('datastore-light'))
 
-local onRequireServer = false
-local onRequireClient = false
-
-local changePacket = HandyNet.defineNamespace('onChanged', function() 
+local changePacket = HandyNet.defineNamespace('userconfig-client-change', function() 
 	return {
 		onChange = HandyNet.definePacket(
 			"client->server",
@@ -22,7 +19,7 @@ local changePacket = HandyNet.defineNamespace('onChanged', function()
 	}
 end)
 
-local serverChangePacket = HandyNet.defineNamespace('onServerChanged', function() 
+local serverChangePacket = HandyNet.defineNamespace('userconfig-server-change', function() 
 	return {
 		response = HandyNet.definePacket(
 			"server->client",
@@ -31,7 +28,7 @@ local serverChangePacket = HandyNet.defineNamespace('onServerChanged', function(
 	}
 end)
 
-local clientGetDataStore = HandyNet.defineNamespace('clientGetDataStore', function() 
+local clientGetDataStore = HandyNet.defineNamespace('userconfig-clientGetDataStore', function() 
 	return {
 		get = HandyNet.definePacket(
 			"client->server",
@@ -42,7 +39,7 @@ local clientGetDataStore = HandyNet.defineNamespace('clientGetDataStore', functi
 	}
 end)
 
-local serverGetDataStore = HandyNet.defineNamespace('serverGetDataStore', function() 
+local serverGetDataStore = HandyNet.defineNamespace('userconfig-serverGetDataStore', function() 
 	return {
 		get = HandyNet.definePacket(
 			"server->client",
@@ -59,15 +56,14 @@ type UserConfigImpl<T={[string]: any}> = {
 }
 
 type ConfigImpl<T={[string]:any}> = {
-	__index:ConfigImpl<T>;
-	__call: (self:ConfigImpl<T>)->(T);
-	SaveChanges:(self:ConfigImpl<T>, player: Player)->();
-	GetChanges:(self:ConfigImpl<T>, call: (self:T,player:Player)->())->();
-	DiscardChanges:(self:ConfigImpl<T>)->();
-	Reset:(self:ConfigImpl<T>)->();
-	RawSet:(self:ConfigImpl<T>, value:{[string]:any})->();
-	RawGet:(self:ConfigImpl<T>)->(T);
-    saveChangesToServer:(self:ConfigImpl<T>)->();
+	__index: ConfigImpl<T>;
+	saveChanges: (self: ConfigImpl<T>, player: Player)->();
+	getChanges: (self: ConfigImpl<T>, call: (self: T,player: Player)->())->();
+	discardChanges: (self: ConfigImpl<T>)->();
+	reset: (self: ConfigImpl<T>)->();
+	rawSet: (self: ConfigImpl<T>, value: { [string]:any })->();
+	rawGet: (self: ConfigImpl<T>)->(T);
+    saveChangesToServer: (self:ConfigImpl<T>)->();
 	values: T;
 	rawValues: T;
 	discardValues: T;
@@ -78,11 +74,7 @@ type ConfigImpl<T={[string]:any}> = {
 local config = {} :: ConfigImpl
 config.__index = config
 
-function config.__call(self)
-	return self.values
-end
-
-function config.SaveChanges(self, player)
+function config.saveChanges(self, player)
 	if not self.values then 
 		return
 	end
@@ -90,7 +82,7 @@ function config.SaveChanges(self, player)
 	self.datastore:save()
 end
 
-function config.GetChanges(self, call)
+function config.getChanges(self, call)
 	changePacket.onChange.event:connect(function(values: { [string]:any }, player: Player)
 		local result = {
 			values = values.values,
@@ -106,15 +98,15 @@ function config.GetChanges(self, call)
 	end)
 end
 
-function config.DiscardChanges(self)
+function config.discardChanges(self)
 	self.values = self.discardValues
 end
 
-function config.Reset(self)
+function config.reset(self)
 	self.values = self.rawValues
 end
 
-function config.RawSet(self, value)
+function config.rawSet(self, value)
 	for k, v in value do
 		if self.rawValues[k] then
 			self.rawValues[k] = v
@@ -122,7 +114,7 @@ function config.RawSet(self, value)
 	end
 end
 
-function config.RawGet(self)
+function config.rawGet(self)
 	return self.rawValues
 end
 
